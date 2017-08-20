@@ -1,0 +1,196 @@
+ToDos (MOTHER FUCKER !!!!)
+===========================
+6) isMITM? in info
+	- min SDK
+	- phone Android version
+	- analyze net Sec Conf file
+
+	
+----------------NOT SO IMPORTANT--------------
+CLI
+====
+1) pkg options (such as -info) without -pkg option given [Not so important]
+2) No options, missing options --> print help message
+3) good CLI
+4) Update help: conf directory explanation ( so far it's mentioned, so not that important)
+5) type log file name in the output of start command
+7) H1 at the beginning of any command's output
+
+6) no component: don'T execute anything	
+8) what does BC receiver result code (0,1) mean ? MAHH
+
+
+6)
+==================================== UnSolved =======================================
+
+
+Squeeze
+========
+			1- multiline comments start with /* or *
+			??2- strings at the end 
+
+Command
+=======
+1) error handling: what happens when a command fails !!!!!!!!!!
+	{i- print sderror & check err code		ii- exception !}
+	a) copy shit from sdcard
+
+DataUriHandler
+==============
+1- Check if commands are added properly when only mimeType exists
+3- scheme without host?? like content:// w khalas?
+
+
+
+==================================== Next Version ======================================
+
+Better Code
+===========
+1) General Utilities class, containing:
+	ClassExtras.getRegexFromString
+	Remove Duplicates
+	
+Base64 (still not working)
+============
+- decode base64 files / parts of files	
+- get all base64 encoded words (if it makes sense)
+
+Searcher
+=========
+- Search also in APK
+
+Find in code:
+=============
+- print full path (Searcher.java line 51)
+- specify external code location
+- Search for the word Key (although too many results)
+
+Start
+=====
+		- Start with and without launcher (now only without)
+- exclude a component in start
+
+Data Dir
+========
+- Check if any of the files are globally readable
+
+Core
+=======
+- detect starting service and know what is the reason for it (and if it makes sense)!!
+- in manifest: activity has parent activity?
+
+Extras
+=======
+1) IN NEXT VERSION: LaunchInfoActivity/AllInOneActivity issue, Either:
+	- Get all Intents started in the class and check for their extras as well (Maybe for exported activities only)
+	- Look for a smarter solution
+
+DB
+==
+2) maybe sha DataDir before I copy it
+		3) option not to copy datadir if it'S too big
+
+Code analysis
+==============
+1) Alternative for JD
+2) Tickler configuration file: java code location instead of decompiled
+3) exclude google and unimportant stuff
+
+
+3) Manifest
+============
+a) Permissions of each component and whether it is secured or not
+b) Metadata tag
+c) activitiy parent?
+
+
+Dex2Jar (Not very important)
+=======
+Get the right Lib directory name
+
+Copy
+====
+SHA before and after to make sure copy went correctly
+
+==================================== Solved =======================================
+Important WTF
+=============
+1) get data from any content provider (COOL: just print the output)
+
+
+Logs
+====
+		1- 2 threads sharing the same file (solved by flushing in the while loop of writing)
+		Con: the log file misses a couple of lines when the Launcher starts (therefore they should not be important)
+
+		2- log file gets overridden
+		Solution: logReader uses FileWriter and appends to the output log file
+
+Manifest
+=========
+		1- Activity Alias tag (Done using XmlElements)
+		
+		
+CodeUtil
+========
+					1- Make sure while filtering the duplicated extras that you have default values (I think Fuck default values)
+					2- If there are no default values then propose any
+					3- Make sure that L and F are required (No L and F)
+					4- Prepare to list Extras (Done but without default values)
+
+Info Disclosure 
+===============
+				1) getLog() or Log.
+2) Key (although too many results) 
+				3) Regex of //
+				4) multiline comments start with /* or *
+				
+
+Extras
+=======
+			2) TODO: 2 matches in the same line (Extras of com.google.android.calendar.AllInOneCalendarActivity are missing)
+			3) serializable, string arrays extra extra (check extra type before adding it)
+			4) double extra (am does not support Double type, entered as float)					
+
+DataUriHandler
+==============
+1- Check if commands are added properly when only mimeType exists
+		2- replace the .* in some URLs (Done: replaced by a dummy value TiCkLeR)
+3- scheme without host?? like content:// w khalas?
+4- Why PathPrefix of com.android.calendar.event.LaunchInfoActivity are empty???? (Fixed)
+
+DAtaDir
+=======
+2) copy dataDir to a chosen destination
+
+Pull data dir
+==============
+1) Duolingo hige delay / freeze [print output between start and waitFor()]
+
+Others
+======
+3) no devices: error of 2 or more devices are connected
+
+Start 
+=====
+1) (retest) After start finishes, the tool does not stop and the log file is not clsoed.	
+Solved by introducing a LogController class with a isStop boolean 
+2) Logs with start component
+3) start without launcher :( [set isLauncher : false in execureTriggerCommands to disable launcher by default]
+	- Strange that all adb logcat messages are saved in my logfile
+
+
+Content Prov
+============
+1) empty Content URI returned to the start and list commands
+
+Rewrite
+=======
+2) Rewrite:
+	SmaliAnalyzer (unused !!!!)
+
+APK zipped directory
+====================
+3) certificates in assets
+					
+		
