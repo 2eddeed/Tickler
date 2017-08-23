@@ -1,0 +1,18 @@
+======================================== Preparation for 
+
+Problems
+========
+
+Added
+======
+-squeeze:
+	- Fixed Log squeeze
+	- Webview, okHTTP
+	- imports
+
+-sc:
+	- exclude com.google and android.support directories
+	- sc_all to search everywhere
+
+-info
+	metadata in manifest
