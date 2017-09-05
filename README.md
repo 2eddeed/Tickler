@@ -143,8 +143,8 @@ Searches the Data directory of the app for the given key
     java -jar Tickler.jar [-pkg <package>] [-bg|--bgSnapshots]
 Copies the background snapshots taken by the device (works with and without -pkg option)
 
-Dynamic Analysis
-=================
+Tickling
+=========
 Triggers components of the app, by all possible combinations of intents. For example, if an activity has an intent-filter of 2 possible actions and 3 data URI schemes, then Tickler will trigger this activity with all possible combinations of this intent. Additionally, Tickler captures the intent extras mentioned in the Java class corresponding to the component, assign them dummy values and add them to the possible intent combinations. Only extras of type boolean, string, int and float are supported. 
  
 if the -exp option is used, then the components will be triggered without root privileges or any special permissions. If not, then the components will be trigged with root privileges. This helps to test the app in 2 different scenarios: against normal-privileged or high-privileged attackers.
@@ -193,19 +193,6 @@ Run custom frida python script
  
 In case of vals and set options, Frida creates/updates a Frida script of that functionality. You can modify the created script as you want, then if you want to run it through tickler, then use *-reuse* option so that it doesn't get overridden.
 
-Examples:
----------
-
-    java -jar Tickler.jar -pkg <package> -t  -act -exp
-Triggers exported activities
-
-    java -jar Tickler.jar -pkg <package> -t -prov -log
-Queries all content providers and saves logcat messages until the tool stops execution
-
-    java -jar Tickler.jar -pkg <package> -t <component_name> 
-Triggers the component, type of triggering depends on the type of the component
-
-
 Other Features
 ================= 
 
@@ -239,5 +226,22 @@ If dest option is not given then the directory's name will be the timestamp of t
 Note
 ----
 For the options that do not require -pkg option, their data will be saved at  *Tickler_Dir*/NoPackage
+
+
+
+Examples:
+---------
+
+    java -jar Tickler.jar -pkg <package> -t  -act -exp
+Triggers exported activities
+
+    java -jar Tickler.jar -pkg <package> -t -prov -log
+Queries all content providers and saves logcat messages until the tool stops execution
+
+    java -jar Tickler.jar -pkg <package> -t <component_name> 
+Triggers the component, type of triggering depends on the type of the component
+
+
+
 
 
