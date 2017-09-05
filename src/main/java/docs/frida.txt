@@ -1,6 +1,0 @@
-Frida:
-
-1) TicklerVars --> frida location
-	Todo: read from config file
-
-2)Another folder for scripts
