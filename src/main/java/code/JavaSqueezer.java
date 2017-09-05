@@ -1,10 +1,15 @@
 package code;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.io.File;
+import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.FileUtils;
 
 import actions.Searcher;
 import base.FileUtil;
@@ -22,11 +27,31 @@ import initialization.TicklerVars;
 
 public class JavaSqueezer {
 	private SearchUtil sU;
+	private String codeRoot;
 	
 	public JavaSqueezer(){
 		this.sU = new SearchUtil();
+		this.codeRoot = TicklerVars.jClassDir;
 	}
 	
+	public void report(String codeRoot){
+		if (codeRoot != null){
+			String codeRootNotHome=codeRoot.replace("~", System.getProperty("user.home"));
+			File cR = new File(codeRootNotHome);
+			if (cR.exists()){
+				this.codeRoot = codeRootNotHome;
+				this.report();
+			}
+		
+			else
+			{
+				OutBut.printError("The code location you entered "+codeRoot+" does not exist");
+			}
+		}
+		else {
+			this.report();
+		}
+	}
 	public void report(){
 		this.libsAndComponents();
 		this.logInCode();
@@ -37,7 +62,10 @@ public class JavaSqueezer {
 		this.credentialsInCode();
 		this.weakCyphers();
 		this.crypto();
-		this.getStringsInCode();
+		this.testDisclosure();
+//		this.getStringsInCode();
+		
+		OutBut.printStep("Where [Java_Code_Dir] is "+this.codeRoot);
 	}
 	
 	///////////////////////////// Search in Code ////////////////////////7
@@ -46,7 +74,7 @@ public class JavaSqueezer {
 	 */
 	public void logInCode(){
 		OutBut.printH2("Logging messages in logcat");
-		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("Log") ;
+		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("Log",this.codeRoot) ;
 		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, ".*Log\\.\\w\\((\\+?)");
 		eResult.addAll(this.sU.refineSearch(e, ".*getLogger\\(\\)\\.(\\w)"));
 		
@@ -59,7 +87,7 @@ public class JavaSqueezer {
 	 */
 	public void externalStorageInCode(){
 		OutBut.printH2("Possible External Storage");
-		ArrayList<SimpleEntry> eArray = this.sU.searchForKeyInJava("getExternal");
+		ArrayList<SimpleEntry> eArray = this.sU.searchForKeyInJava("getExternal",this.codeRoot);
 		
 		this.printE(eArray);
 		
@@ -67,16 +95,18 @@ public class JavaSqueezer {
 	
 	private void storage(){
 		OutBut.printH2("Storage: DBs and shared preferences");
-		String[] keys = {"sharedpref", "SQLiteDatabase", "AndroidKeyStore", "KeyStore"};
+		String[] keys = {"sharedpref", "SQLiteDatabase", "CacheDir","AndroidKeyStore", "KeyStore"};
 		ArrayList<SimpleEntry> eArray = this.returnFNameLineGroup(keys, false);
 		this.printE(eArray);
 	}
 	
 	private void libsAndComponents(){
 		OutBut.printH2("Imports");
-		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("import") ;
-		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "^(?:(?!(import\\sjava|import\\sandroid)).)*$");
+		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("import",this.codeRoot) ;
+		ArrayList<SimpleEntry> e1 = this.sU.refineSearch(e,"(^import.+)") ;
+		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e1, "^(?:(?!(import\\sjava|import\\sandroid)).)*$");
 		ArrayList<String> files=this.returnValues(eResult);
+		
 		
 		for (String s:files)
 			OutBut.printNormal(s);
@@ -87,7 +117,7 @@ public class JavaSqueezer {
 		 files = new ArrayList<>();
 		
 		for (String c:comps){
-			hits=this.sU.searchForKeyInJava(c);
+			hits=this.sU.searchForKeyInJava(c,this.codeRoot);
 			if (!hits.isEmpty()){
 				OutBut.printH3(c);
 				files=this.returnFileNames(hits);
@@ -109,16 +139,23 @@ public class JavaSqueezer {
 		OutBut.printH2("Comments");
 		
 		ArrayList<SimpleEntry> eComments = new ArrayList<>();
-		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("//");
-		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "[^:]//(\\s*[a-zA-Z]+)");
+		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("//",this.codeRoot);
+		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "//(\\s*[a-zA-Z]+)");
+		eResult= this.sU.refineSearch(eResult, "^(?!\\s*//\\s*from\\s*to\\s*target\\s*type)(.*$)");
+		eResult= this.sU.refineSearch(eResult, "^(?!\\s*//\\s*Byte\\s*code:)(.*$)");
+		eResult= this.sU.refineSearch(eResult, "^(?!\\s*//\\s*start\\s*length\\s*slot\\s*name\\s*signature)(.*$)");
+		eResult= this.sU.refineSearch(eResult, "^(?!\\s*//\\s*Local\\s*variable\\s*table)(.*$)");
+		eResult= this.sU.refineSearch(eResult, "^(?!\\s*//\\s*Exception\\s*table:)(.*$)");
+	
 		eComments.addAll(eResult);
 		
-		ArrayList<SimpleEntry> eM = this.sU.searchForKeyInJava("*");
+		ArrayList<SimpleEntry> eM = this.sU.searchForKeyInJava("*",this.codeRoot);
 		ArrayList<SimpleEntry> eResultMLine = this.sU.refineSearchMatch(eM, "\\s*/\\*.+");
-		ArrayList<SimpleEntry> eResultMLine2 = this.sU.refineSearchMatch(eM, "\\s*\\*.+");
+		eResultMLine = this.sU.refineSearchMatch(eResultMLine, "^(?!\\s*/\\*\\s*Error\\s*\\*/)(.*$)");
+//		ArrayList<SimpleEntry> eResultMLine2 = this.sU.refineSearchMatch(eM, "\\s*\\*.+");
 		
 		eComments.addAll(eResultMLine);
-		eComments.addAll(eResultMLine2);
+//		eComments.addAll(eResultMLine2);
 		this.printE(this.removeDuplicatedSimpleEntries(eComments));
 		
 	}
@@ -130,7 +167,7 @@ public class JavaSqueezer {
 		System.out.println("\n");
 		OutBut.printH2("Possible credentials disclosure");
 		
-		String[] keys = {"pass","password", "pwd", "username", "uname", "userID", "credential", "admin"};
+		String[] keys = {"pass","password", "pwd", "username", "user name", "userID", "credential", "admin"};
 		ArrayList<SimpleEntry> eA = this.returnFNameLineGroup(keys, false);
 		
 		this.printE(this.removeDuplicatedSimpleEntries(eA));
@@ -147,7 +184,7 @@ public class JavaSqueezer {
 		ArrayList<SimpleEntry> eA = new ArrayList<>();
 		
 		for (String c : weakCrypto)
-			eA.addAll(this.sU.searchForKeyInJava(c));
+			eA.addAll(this.sU.searchForKeyInJava(c,this.codeRoot));
 		
 		this.printE(eA);
 	}
@@ -166,7 +203,7 @@ public class JavaSqueezer {
 	private void getStringsInCode(){
 		System.out.println("\n");
 		OutBut.printH2("Strings");
-		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("\"");
+		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("\"",this.codeRoot);
 		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "[^:](\".+\")");
 		
 //		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "(\"\\w{32}\"|\"\\w{40}\"|\"\\w{56}\"|\"\\w{64}\")");
@@ -176,7 +213,7 @@ public class JavaSqueezer {
 	private void getHashes(){
 		System.out.println("\n");
 		OutBut.printH2("Strings");
-		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("\"");
+		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("\"",this.codeRoot);
 
 		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "(\"\\w{32}\"|\"\\w{40}\"|\"\\w{56}\"|\"\\w{64}\")");
 		this.printE(this.removeDuplicatedSimpleEntries(eResult));
@@ -188,7 +225,7 @@ public class JavaSqueezer {
 	 */
 	
 	public boolean isExternalStorage(){
-		ArrayList<SimpleEntry> eArray = this.sU.searchForKeyInJava("getExternal");
+		ArrayList<SimpleEntry> eArray = this.sU.searchForKeyInJava("getExternal",this.codeRoot);
 		if (!this.sU.refineSearch(eArray, "(getExternalFilesDir)").isEmpty() || !this.sU.refineSearch(eArray, "getExternalStoragePublicDirectory").isEmpty())
 			return true;
 		
@@ -204,15 +241,28 @@ public class JavaSqueezer {
 	}
 	
 	public void getHttpUris(){
-		ArrayList<SimpleEntry> hits = this.sU.searchForKeyInJava("http"); 
+		ArrayList<SimpleEntry> hits = this.sU.searchForKeyInJava("http",this.codeRoot); 
 		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(hits, "http(s?)://(.+?)[\"'\\s]");
 
 		this.printE(eResult);
 		
+		OutBut.printH3("HTTP URL summary:");
+		ArrayList<String> uris = new ArrayList<>();
+		for (SimpleEntry e: hits){
+			uris.add(this.correctUrl((String)e.getValue()));
+//			OutBut.printNormal(this.correctUrl((String)e.getValue()));
+		}
+		
+		OtherUtil.printStringArray(OtherUtil.removeDuplicates(uris));
 		
 	}
 	
-	
+	private void testDisclosure(){
+		OutBut.printH2("Test");
+		ArrayList<SimpleEntry> hits = this.sU.searchForKeyInJava("test",this.codeRoot);
+		hits = this.sU.refineSearch(hits, "(.*(test|TEST).*)");
+		this.printE(hits);
+	}
 	
 	/**
 	 * Print squeeze output to stdout
@@ -220,11 +270,10 @@ public class JavaSqueezer {
 	 */
 	private void printE(ArrayList<SimpleEntry> eArray){
 		for (SimpleEntry e: eArray){
-			String fileName=e.getKey().toString().replaceAll(TicklerVars.jClassDir, "[Java_Code_Dir]");
+			String fileName=e.getKey().toString().replaceAll(this.codeRoot, "[Java_Code_Dir]");
 			System.out.println("#FileName: "+fileName);
 			System.out.println(" "+e.getValue()+"\n");
 		}
-			
 	}
 	
 	private ArrayList<SimpleEntry> removeDuplicatedSimpleEntries(ArrayList<SimpleEntry> orig) {
@@ -239,7 +288,7 @@ public class JavaSqueezer {
 	private ArrayList<String> returnFileNames(ArrayList<SimpleEntry> hits){
 		ArrayList<String> files = new ArrayList<>();
 		for (SimpleEntry e:hits)
-			files.add(e.getKey().toString().replaceAll(TicklerVars.jClassDir, "[Java_Code_Dir]"));
+			files.add(e.getKey().toString().replaceAll(this.codeRoot, "[Java_Code_Dir]"));
 		 
 		ArrayList<String> ret= new ArrayList<String>(new LinkedHashSet<String>(files));
 		return ret;
@@ -249,6 +298,8 @@ public class JavaSqueezer {
 		ArrayList<String> files = new ArrayList<>();
 		for (SimpleEntry e:hits)
 			files.add(e.getValue().toString());
+		
+		Collections.sort(files);
 	 
 		ArrayList<String> ret= new ArrayList<String>(new LinkedHashSet<String>(files));
 		return ret;
@@ -264,15 +315,24 @@ public class JavaSqueezer {
 		ArrayList<SimpleEntry> keyRes = new ArrayList<>();
 		
 		for (String s: keys){
-			keyRes = this.sU.searchForKeyInJava(s);
+			keyRes = this.sU.searchForKeyInJava(s,this.codeRoot);
 			if (printName && (!keyRes.isEmpty()))
 				OutBut.printH3(s);
 			
-			eA.addAll(this.sU.searchForKeyInJava(s));
+			eA.addAll(this.sU.searchForKeyInJava(s,this.codeRoot));
 		}
 		
 		return eA;
 		
+	}
+	
+	private String correctUrl(String line) {
+		String url="";
+		Matcher m = Pattern.compile("http(s?)://(.+?)[\"'\\s]").matcher(line);
+		if (m.find()) {
+			url = line.substring(m.start(0),m.end(0)-1);
+		}
+		return url;
 	}
 	
 	

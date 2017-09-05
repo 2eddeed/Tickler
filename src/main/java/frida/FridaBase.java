@@ -1,66 +1,41 @@
 package frida;
 
+import java.util.ArrayList;
+
 import cliGui.OutBut;
 import commandExec.Commando;
 import initialization.TicklerVars;
 
 public class FridaBase {
 	
-	private Commando commando;
-	
-	public FridaBase()
-	{
-		this.commando = new Commando();
-	}
-	public void initFrida(){
-		if (!(this.isFrida() && this.isFridaServer() && this.isPython())){
-			OutBut.printError("Frida is not properly configured");
-			System.exit(127);
-		}
-		
-		this.startFridaServer();
+	public FridaBase() {
 		
 	}
 	
-	/**
-	 * Frida exists on host
-	 * @return
-	 */
-	private boolean isFrida(){
-		String cmd = "frida -h";
-		int ret = commando.executeProcessListPrintOP(cmd,false);
-		
-		if (ret != 0)
-			return false;
-		
-		return true;
+	public void fridaEnumerateClasses(){
+		FridaEnumerateClasses enumClasses = new FridaEnumerateClasses();
+		enumClasses.run();
+		ArrayList<String> op = new ArrayList<>();
 	}
 	
-	/**
-	 * If Frida server exists on the device
-	 * @return
-	 */
-	private boolean isFridaServer(){
-		String cmd = TicklerVars.fridaServerLoc+" -h";
-		String ret = commando.execADB(cmd);
-		
-		if (ret.toLowerCase().contains("--version"))
-			return true;
-		return false;
+	public void fridaScript(ArrayList<String> args){
+		FridaPythonScript script = new FridaPythonScript(args);
+		script.execute();
 	}
 	
-	private boolean isPython(){
-		String cmd = "python3 -h";
-		int ret = commando.executeProcessListPrintOP(cmd,false);
-		
-		if (ret != 0)
-			return false;
-		
-		return true;
+	public void fridaGetInputAndOutput(ArrayList<String> args, boolean reuse){
+		FridaGetArgsAndReturn action = new FridaGetArgsAndReturn(reuse);
+		action.run(args);
 	}
-
-	private void startFridaServer(){
-		String cmd = TicklerVars.fridaServerLoc+"&";
-		commando.execRoot(cmd);
+	
+	public void fridaSetValue(ArrayList<String> args, boolean reuse){
+		FridaSetValue action = new FridaSetValue(reuse);
+		action.run(args);
 	}
+	
+	public void fridaUnpin(ArrayList<String> args, boolean reuse) {
+		FridaUnpinSslContext action = new FridaUnpinSslContext(reuse);
+		action.run(args);
+	}
+	
 }

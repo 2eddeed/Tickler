@@ -4,17 +4,24 @@ import java.util.ArrayList;
 
 import initialization.TicklerVars;
 
-public class FridaEnumerateClasses extends FridaScript{
+public class FridaEnumerateClasses {
 
+	private FridaPythonScript script;
+	private ArrayList<String> output;
 	
 	public FridaEnumerateClasses(){
-		super();
-		this.path="/home/aabolhadid/workspace/TicklerFrida/fridaScripts/enumerate_classes.py";
+		this.script = new FridaPythonScript();
+		this.output = new ArrayList<>();
+		this.script.setPath(FridaVars.ENUM_LOC);
 	}
 	
-	public ArrayList<String> executeScript(ArrayList<String> args){
+	public void run(){
 		ArrayList<String> input = new ArrayList<>();
 		input.add(TicklerVars.pkgName);
-		return super.executeScript(input);
+		this.output = this.script.executeReturnOutput(input);
+	}
+	
+	public ArrayList<String> getOutput(){
+		return this.output;
 	}
 }

@@ -40,10 +40,6 @@ public class InfoGatheringReporting {
 
 		///////////////////////// Manifest Analysis //////////////////////////////////
 		this.manifestAnalysis();
-//		OutBut.printH2("URLs found in Code");
-		
-//		ArrayList<String> uris =info.getHttpUris();
-//		this.printArrayList(OtherUtil.removeDuplicates(uris));
 		
 		OutBut.printH2("Certificates and Keys found in the APK zipped file");
 		this.info.getCertificatesInApkDirectory();

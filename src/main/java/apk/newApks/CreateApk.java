@@ -67,7 +67,7 @@ public class CreateApk {
 			this.newApk.changeManifest();
 			
 			this.apktool.apkToolCompile(this.newAppDir,this.apk);
-			this.afterCompilation();
+			this.afterCompilation(false);
 			successfulSign =this.signer.signApk(this.apk);
 			if (successfulSign)
 				this.reinstallNewApk();
@@ -81,8 +81,26 @@ public class CreateApk {
 		}
 	}
 	
-	private void afterCompilation() {
-		this.ft.deleteFromHost(TicklerVars.newApkTempDir);
+	public void createAnyApk(String decompiledDir, String name) {
+		
+		this.apk = TicklerVars.appTickDir+name;
+		OutBut.printStep("Creating a new APK at: "+this.apk);
+		
+		this.apktool.apkToolCompile(decompiledDir,this.apk);
+		this.afterCompilation(true);
+		boolean successfulSign =this.signer.signApk(this.apk);
+		if (successfulSign)
+			this.reinstallNewApk();
+		
+	}
+	
+	/**
+	 * 
+	 * @param isCustom boolean if it's creating a custom APK (not dbg nor mitm) then don't delete the source directory
+	 */
+	private void afterCompilation(boolean isCustom) {
+		if (!isCustom)
+			this.ft.deleteFromHost(TicklerVars.newApkTempDir);
 		
 		if ( this.ft.isExist(this.apk)){
 			System.out.println("\n\n");

@@ -222,6 +222,40 @@ public class Commando {
 		return output.toString();
 	}
 	
+	public String executePythonScript(String command)
+	{
+//		command = "frida -U wana.notenaf.intenttest -l /home/aabolhadid/tools/Frida/myScripts/get_values.js";
+		this.output = new StringBuffer(	);
+		Process process;
+		try {
+			process=Runtime.getRuntime().exec(command);
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader( process.getErrorStream()));
+			
+			String line = "";			
+			while ((line = reader.readLine())!= null) {
+				output.append(line + "\n");
+				OutBut.printNormal(line);
+			}
+			
+			if (output.toString().isEmpty()) {
+				reader = new BufferedReader(new InputStreamReader( process.getErrorStream()));
+				line = "";			
+				while ((line = reader.readLine())!= null) {
+//					output.append(line + "\n");
+					OutBut.printNormal(line);
+				}
+			}
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return output.toString();
+	}
+	
 	//////////////////////////////////// execute ADB or Root Commands //////////////////////////
 	public String execADB(String command, boolean wait) {
 		return this.executeCommand("adb shell "+command, wait);

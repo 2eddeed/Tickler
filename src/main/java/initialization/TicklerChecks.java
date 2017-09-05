@@ -165,6 +165,10 @@ public class TicklerChecks {
 						String loc = line.substring(line.indexOf("=")+1, line.length()-1);
 						TicklerVars.sdCardPath = this.correctJarLoc(loc);
 					}
+					else if (line.contains("Frida_server_path")){
+						String loc = line.substring(line.indexOf("=")+1, line.length());
+						TicklerVars.fridaServerLoc = loc;
+					}
 				
 				}
 				reader.close();

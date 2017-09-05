@@ -1,9 +1,9 @@
 **Tickler**
 ==========
 
-A java tool that helps to pentest Android apps faster, more easily and more efficiently. Tickler offers many features of information gathering, static and dynamic checks that cover most of the aspects of Android apps pentesting. 
+A java tool that helps to pentest Android apps faster, more easily and more efficiently. Tickler offers many features of information gathering, static and dynamic checks that cover most of the aspects of Android apps pentesting. It also offers several features that pentesters need during their pentests. Tickler also integrates with Frida to provide method manipulation and pinning circumvention.
 
-Tickler requires a linux host (tested on Ubuntu) and a rooted Android device connected to its USB port. The tool does not install anything on the Android device, it only creates a *Tickler* directory on /sdcard . Tickler depends on Android SDK to run some commands on the device and copy app's data to *TicklerWorkspace* directory on the host for further analysis. *TicklerWorkspace* is the working directory of Tickler and each app has a separate subdirectory in *TicklerWorkspace* which can contain the following (depending on user actions):
+Tickler requires a linux host (tested on Ubuntu) and a rooted Android device connected to its USB port. The tool does not install anything on the Android device, it only creates a *Tickler* directory on /sdcard . Tickler depends on Android SDK to run commands on the device and copy app's data to *TicklerWorkspace* directory on the host for further analysis. *TicklerWorkspace* is the working directory of Tickler and each app has a separate subdirectory in *TicklerWorkspace* which can contain the following (depending on user actions):
 - DataDir directory: a copy of the data directory of the app
 - extracted directory: Output of apktool on the app, contains smali code, resources, libraries...etc.
 - bgSnapshots directory: Contains background snapshots copied from the device.
@@ -21,6 +21,10 @@ Tickler highly depends on the following tools, so they should exist on your mach
 - Java 7 or higher
 - Android SDK tools (adb and friends) 
 - sqlite3
+
+Other tools are required for some features, but Tickler can still run without them:
+- Frida
+- jarsigner
 
 How to use it
 =============
@@ -130,10 +134,10 @@ Copies the data directory of the app (to DataDirOld) then asks the user to do th
     java -jar Tickler.jar -pkg <package> -diff [d|detailed]
 Does the same as the normal -diff command, also shows what exactly changed in text files and unencrypted databases.
 
-    java -jar Tickler.jar -pkg <package> [-sc|--searchCode] <key>
+    java -jar Tickler.jar -pkg <package> -sc <key>
 Searches the decompiled Java code of the app for the given key
 
-    java -jar Tickler.jar -pkg <package> [-sd|--searchDataDir] <key>
+    java -jar Tickler.jar -pkg <package> -sd <key>
 Searches the Data directory of the app for the given key
 
     java -jar Tickler.jar [-pkg <package>] [-bg|--bgSnapshots]
@@ -167,6 +171,28 @@ if no value, then the target is all of the above
 
 [-log]: Captures all logcat messages generated during the triggering session. Log file is saved in logs subdirectory.
 
+Frida:
+------
+Frida should be installed on your host machine. Also the location of Frida server should be added to *Tickler.conf* file.
+
+    java -jar Tickler.jar -pkg <package> -frida enum
+Enumerates loaded classes
+
+    java -jar Tickler.jar -pkg <package> -frida vals <ClassName> <MethodName> <NumberOfArgs> [-reuse]
+Displays arguments and return value of this method (only primitive datatypes and String)
+
+    java -jar Tickler.jar -pkg <package> -frida set <ClassName> <MethodName> <NumberOfArgs> <NumberOfArgToModify> <newValue>[-reuse]
+Sets the argument number <NumberOfArgToModify> to <newValue> (only primitive datatypes and String)
+If <NumberOfArgToModify> > <NumberOfArgs>: sets the return value 
+
+    java -jar Tickler.jar -pkg <package> -frida unpin <CertificateLocation>
+SSL pinning circumvention as in https://codeshare.frida.re/@pcipolloni/universal-android-ssl-pinning-bypass-with-frida/
+
+    java -jar Tickler.jar -pkg <package> -frida script <scriptPath> <arguments>
+Run custom frida python script 
+ 
+In case of vals and set options, Frida creates/updates a Frida script of that functionality. You can modify the created script as you want, then if you want to run it through tickler, then use *-reuse* option so that it doesn't get overridden.
+
 Examples:
 ---------
 
@@ -180,15 +206,19 @@ Queries all content providers and saves logcat messages until the tool stops exe
 Triggers the component, type of triggering depends on the type of the component
 
 
-Others
-======= 
+Other Features
+================= 
 
-    java -jar Tickler.jar -pkg <package> [-dbg|-debuggable]
+    java -jar Tickler.jar -pkg <package> -dbg
 Creates a debuggable version of the app, which can be installed on the device and debugged using any external tool.
 
 Tickler comes with a keystore to sign the debuggable apk, but it requires *jarsigner* tool on the host.
 
-Due to de- and re-compilation of the app, it is possible that the debuggable app does not function perfectly. 
+    java -jar Tickler.jar -pkg <package> -apk <decompiledDirectory>
+Builds an apk file from a directory, signs it and installs it.
+
+    java -jar Tickler.jar -pkg <package> -mitm
+Modifies Network security configuration of the app to circumvent MitM restrictions on Android Nougat (not related to pinning) 
 
     java -jar Tickler.jar -pkg <package> -cp2host <source_path> [dest]
 Copies files / directories from the android devices. 

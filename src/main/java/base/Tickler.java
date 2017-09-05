@@ -19,6 +19,7 @@ import components.Receiver;
 import db.DatabaseTester;
 import device.Packagez;
 import exceptions.TNotFoundEx;
+import frida.FridaCli;
 import info.InfoGathering;
 import info.InfoGatheringReporting;
 import info.ListComponents;
@@ -55,7 +56,6 @@ public class Tickler {
 	}
 	
 	private void inits() {
-		this.searcher = new Searcher();
 		this.copyz = new CopyUtil();
 		this.snaps = new Snapshots();
 		this.comps = new Comparer();
@@ -216,6 +216,11 @@ public class Tickler {
 		this.newApk = new CreateApk(TicklerConst.mitm);
 		this.newApk.createNewApk();
 	}
+	
+	public void createCustomAPK(String dir, String name){
+		this.newApk = new CreateApk(10);
+		this.newApk.createAnyApk(dir, name);
+	}
 
 	public void decompileApk(){
 		Decompiler d2j = new Decompiler();
@@ -277,9 +282,9 @@ public class Tickler {
 		pkgz.printInstalledPkgs();
 	}
 	
-	public void squeezeCode(){
+	public void squeezeCode(String codeLoc){
 		JavaSqueezer disc = new JavaSqueezer();
-		disc.report();
+		disc.report(codeLoc);
 	}
 	
 	/////////////// Search //////////////////
@@ -290,16 +295,19 @@ public class Tickler {
 	
 
 	
-	public void searchInCode(String key){
-		this.searcher.sC(key,false);
+	public void searchInCode(String key,String codeLoc){
+		this.searcher = new Searcher();
+		this.searcher.scCustomCodeLoc(key, codeLoc);
+//		this.searcher.sC(key,false);
 	}
 	
 	public void searchInCodeAll(String key){
+		this.searcher = new Searcher();
 		this.searcher.sC(key,true);
 	}
 	
 	public void searchInDataDir(String key){
-
+		this.searcher = new Searcher();
 		this.searcher.searchForKeyInDataDir(key);
 	}
 	
@@ -323,6 +331,11 @@ public class Tickler {
 		ft.createDirOnHost(TicklerVars.logDir);
 	}
 	
+	///////////////////////////// Frida //////////////////////////////
 	
+	public void frida(String[] args, boolean reuse){
+		FridaCli fridaCli = new FridaCli();
+		fridaCli.fridaThis(args, reuse);
+	}
 	
 }

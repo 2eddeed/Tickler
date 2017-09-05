@@ -31,6 +31,10 @@ regex: ".*?get.*?Extra\\(\"(.*?)\".*"  will get the first beginTime, because I u
 regex: "get.*?Extra\\(\"(.*?)\"" gets both.
 Conclusion: using .* at the beginning or the end of the regex is usually unnecessary and it neglects all matches except the first/last (according to its location).
 
+For negating:
+"^(?!\\s*//\\s*from\\s*to\\s*target\\s*type)(.*$) to get away of // from to target type.
+(.*$): to capture the "rest" of the line in case it doesn't match. means that it catches the whole line
+
 
 REmoving duplicates
 ===================

@@ -21,9 +21,9 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 import base.OtherUtil;
 import base.SearchUtil;
 import base.Tickler;
-import frida.FridaBase;
+import frida.FridaInit;
 import frida.FridaEnumerateClasses;
-import frida.FridaScript;
+import frida.FridaPythonScript;
 import initialization.TicklerConst;
 import initialization.TicklerVars;
 
@@ -35,7 +35,6 @@ public class TicklerCLI {
 	public static void main(String[] args) {
 		
 		TicklerCLI cli = new TicklerCLI();
-//		cli.test();
 		
 		cli.parser = new BasicParser();
 		cli.options = new Options();
@@ -56,7 +55,7 @@ public class TicklerCLI {
 		Option list = new Option("l","list",false,"List components");
 		Option info = new Option("i","info",false,"List information about the app");
 		Option snap = new Option("screen","screenshot",false,"takes a snapshot of the device's screen");
-		Option searchInCode = new Option("sc","searchCode",true,"Search for a specific key in Java code");
+//		Option searchInCode = new Option("sc","searchCode",true,"Search for a specific key in Java code");
 		Option searchInCodeAll = new Option("sc_all",null,true,"Search for a specific key in Java code");
 		Option searchInSandbox = new Option("sd","searchDataDir",true, "Search for a key in the Data Dir of an app (Files and DB)");
 		Option log = new Option("log",null,false,"capture LogCat messages");
@@ -64,11 +63,10 @@ public class TicklerCLI {
 		Option bgSnap = new Option("bg","backGroundSnapshots",false,"Get Background images from the device");
 		Option debuggable = new Option("dbg","debuggable",false,"Create a debuggable APK");
 		Option decompile = new Option("decomp",null,false, "decompile apk into java code");
-		Option squeeze = new Option("squeeze",null,false, "Look for info disclosure in code");
-		Option noDevice = new Option("nodev",null,false, "Work without a connected device");
 		Option version = new Option("version",null,false, "Print version");
 		Option noCopy = new Option("nu","noUpdate",false, "Doesn't update DataDir before execution (with db and big dataDir)");
 		Option mitm = new Option("mitm",null,false, "Allows user CA in Android 7");
+		Option fridaReuse = new Option("reuse",null,false, "Reuse existing Frida JS");
 		
 		Option copy2host = OptionBuilder.create("cp2host");
 		copy2host.setOptionalArg(true);
@@ -85,6 +83,21 @@ public class TicklerCLI {
 		Option dataDir = OptionBuilder.create("dataDir");
 		dataDir.setOptionalArg(true);
 		dataDir.setArgs(1);
+		
+		Option squeeze = OptionBuilder.create("squeeze");
+		squeeze.setOptionalArg(true);
+		squeeze.setArgs(1);
+		
+		Option sc = OptionBuilder.create("sc");
+		sc.setOptionalArg(true);
+		sc.setArgs(2);
+		
+		Option apk = OptionBuilder.create("apk");
+		apk.setArgs(2);
+		
+		Option frida = OptionBuilder.create("frida");
+		frida.setOptionalArg(true);
+		frida.setArgs(6);
 		
 		cli.options.addOption(pack);
 		cli.options.addOption(trigger);
@@ -103,7 +116,7 @@ public class TicklerCLI {
 		cli.options.addOption(findPkg);
 		cli.options.addOption(listPack);
 		cli.options.addOption(snap);
-		cli.options.addOption(searchInCode);
+		cli.options.addOption(sc);
 		cli.options.addOption(searchInCodeAll);
 		cli.options.addOption(searchInSandbox);
 		cli.options.addOption(log);
@@ -114,10 +127,12 @@ public class TicklerCLI {
 		cli.options.addOption(dataDir);
 		cli.options.addOption(decompile);
 		cli.options.addOption(squeeze);
-		cli.options.addOption(noDevice);
 		cli.options.addOption(version);
 		cli.options.addOption(noCopy);
 		cli.options.addOption(mitm);
+		cli.options.addOption(apk);
+		cli.options.addOption(frida);
+		cli.options.addOption(fridaReuse);
 		
 		try {
 			CommandLine cl = cli.parser.parse(cli.options, args,false);
@@ -141,32 +156,6 @@ public class TicklerCLI {
 		
 	}
 	
-	public void test(){
-		SearchUtil sU = new SearchUtil();
-		String s= "Log.d(\"Successful Login:\", \", account=\" + DoLogin.this.username + \":\" + DoLogin.this.password);";
-		
-		String regex = ".*Log\\.\\w\\((\\+?)";
-		ArrayList<String> result = new ArrayList<>();
-		
-		Pattern p = Pattern.compile(regex);
-		Matcher m = p.matcher(s);
-		while(m.find()){			
-//				result.add(m.group(1));
-			System.out.println("Got it !!!!");
-		}
-		
-		
-//		regexResult = OtherUtil.getRegexFromString(e.getValue().toString(), regex);
-//		if (!regexResult.isEmpty())
-		
-//		String appName = "de.qbo.qbo.dev";
-//		TicklerVars.updateVars(appName);
-//		FridaBase fB = new FridaBase();
-//		fB.initFrida();
-//		
-//		FridaEnumerateClasses enu = new FridaEnumerateClasses(); 
-//		System.out.println(enu.getOutput(null));
-	}
 	
 	public void startTickler(CommandLine cl){
 		boolean exported = false;
@@ -203,10 +192,14 @@ public class TicklerCLI {
 				t.setLog(true);
 			}
 			else if (cl.hasOption("mitm")){
-				t.createMitM();;
+				t.createMitM();
 			}
 			else if (cl.hasOption("debuggable")){
-				t.createDebuggable();;
+				t.createDebuggable();
+			}
+			else if (cl.hasOption("apk")){
+				String[] apkArgs = cl.getOptionValues("apk");
+				t.createCustomAPK(apkArgs[0], apkArgs[1]);
 			}
 			
 			
@@ -260,11 +253,19 @@ public class TicklerCLI {
 					t.list(target,exported,details);
 				
 			}
-//				t.listType(target,exported);
 			
 			//Search in Code
-			else if (cl.hasOption("sc") || cl.hasOption("searchCode"))
-				t.searchInCode(cl.getOptionValue("sc"));
+			else if (cl.hasOption("sc") || cl.hasOption("searchCode")){
+				
+				String[] scArgs = cl.getOptionValues("sc");
+				String key = scArgs[0];
+				String loc = null;
+				if (scArgs.length >1){
+					loc = scArgs[1];
+				}
+				
+				t.searchInCode(key,loc);
+			}
 			
 			else if (cl.hasOption("sc_all") )
 				t.searchInCodeAll(cl.getOptionValue("sc_all"));
@@ -293,8 +294,10 @@ public class TicklerCLI {
 				t.informationGathering();
 			
 			//Disclosure
-			else if (cl.hasOption("squeeze"))
-				t.squeezeCode();
+			else if (cl.hasOption("squeeze")){
+				String codeLoc = cl.getOptionValue("squeeze");
+				t.squeezeCode(codeLoc);
+			}
 			
 			else if (cl.hasOption("dataDir")){
 				String dest = cl.getOptionValue("dataDir");
@@ -305,6 +308,13 @@ public class TicklerCLI {
 			else if (cl.hasOption("decomp"))
 				t.decompileApk();
 			
+			else if (cl.hasOption("frida")){
+				boolean reuse = false;
+				if (cl.hasOption("reuse"))
+					reuse = true;
+				String[] fridaArgs = cl.getOptionValues("frida");
+				t.frida(fridaArgs,reuse);
+			}
 			
 		}
 		// Snapshot, with or without package name

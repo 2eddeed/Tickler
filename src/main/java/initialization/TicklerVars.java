@@ -7,7 +7,8 @@ public abstract class TicklerVars {
 	public static boolean isLib;
 	public static String jarPath, configPath;
 	public static String appTickDir,sdCardPath, tickManifestFile,extractedDir,dataDir
-	,smaliDir, imageDir, logDir, bgSnapshotsDir,transferDir, libDir, libJarDir, libNotJarLib, dex2jarPath, dex2jarDir,jClassDir,keyStore,newApkTempDir,mitmXmlName, fridaServerLoc;
+	,smaliDir, imageDir, logDir, bgSnapshotsDir,transferDir, libDir, libJarDir, libNotJarLib, dex2jarPath, 
+	dex2jarDir,jClassDir,keyStore,newApkTempDir,mitmXmlName, fridaServerLoc, fridaScriptsDir;
 	public static String version="2";
 		
 	public static void setPkgName(String pName){
@@ -40,10 +41,10 @@ public abstract class TicklerVars {
 		dex2jarDir = appTickDir+TicklerConst.DEX2JAR_OP_DIR_NAME;
 		// Output of Java classes
 		jClassDir = appTickDir+TicklerConst.JAVA_CODE_DIR_NAME;
-		keyStore = jarPath+TicklerConst.KEY_STORE_DIR_NAME;
+		keyStore = libNotJarLib+TicklerConst.KEY_STORE_DIR_NAME;
 		newApkTempDir = appTickDir+TicklerConst.newAppTempDir;
 		
-		fridaServerLoc=TicklerConst.FRIDA_SERVER_EXEC;
+		fridaScriptsDir = libNotJarLib+TicklerConst.FRIDA_SCRIPTS_DIR_NAME;
 	}
 	
 	public static void setTicklerDir(String dir){

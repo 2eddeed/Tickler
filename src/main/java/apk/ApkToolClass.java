@@ -83,20 +83,6 @@ public class ApkToolClass {
 		}
 	}
 	
-	//Just for debuggableApp
-	private void apkToolCompile(String path){
-		String tempApktoolLog = TicklerVars.logDir+"debuggableCompile.log";
-		ApkOptions apkOptions = new ApkOptions();
-		try{
-			File file = new File(tempApktoolLog);
-			OutBut.printH3("APKTool output:");
-			new Androlib(apkOptions).build(new File(path), new File(this.debuggableApk));
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-	
 	
 	private void deleteExistingDecodedDir(){
 		File decodedDir = new File (TicklerVars.extractedDir);

@@ -31,8 +31,13 @@ public class OtherUtil {
 		
 		Pattern p = Pattern.compile(regex);
 		Matcher m = p.matcher(s);
-		while(m.find()){			
+		try{
+			while(m.find())		
 				result.add(m.group(1));
+		}
+		catch(IndexOutOfBoundsException ex)
+		{
+			
 		}
 		
 		return result;
@@ -101,5 +106,25 @@ public class OtherUtil {
 			
 			OutBut.printStep("Where "+replacement+" is "+toBeReplaced);
 		}
+	}
+	
+	/**
+	 * Corrects a path if ~ is used
+	 * @param path
+	 * @return
+	 */
+	public static String getAbsolutePath(String path){
+		String codeRootNotHome=path.replace("~", System.getProperty("user.home"));
+		File cR = new File(codeRootNotHome);
+		if (cR.exists()){
+			return codeRootNotHome;
+		}
+		
+		return null;
+	}
+	
+	public static void  printStringArray(ArrayList<String> aL){
+		for (String s:aL)
+			OutBut.printNormal(s);
 	}
 }

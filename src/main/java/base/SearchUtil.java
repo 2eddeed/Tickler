@@ -60,16 +60,15 @@ public class SearchUtil {
 	}
 	
 	/**
-	 * Squeeze search:
-	 * Excluding com/google and other directories
+	 * Squeeze code located in a custom location
 	 * @param key
-	 * @param loc
+	 * @param codeLoc
+	 * @return
 	 */
-	
-	public ArrayList<SimpleEntry> searchForKeyInJava(String key){
+	public ArrayList<SimpleEntry> searchForKeyInJava(String key, String codeLoc){
 		
 		ArrayList<SimpleEntry> hits = new ArrayList<>();
-		List<File> files = this.search4FileInDir(TicklerVars.jClassDir, null);
+		List<File> files = this.search4FileInDir(codeLoc, null);
 		for (File f : files){
 			String fName = f.getAbsolutePath();
 			if (!fName.contains("com/google") && !fName.contains("android/support")){
@@ -82,10 +81,11 @@ public class SearchUtil {
 		}
 		
 		return hits;
-		
 	}
 	
-	
+	public ArrayList<SimpleEntry> searchForKeyInJava(String key){ 
+		return this.searchForKeyInJava(key, TicklerVars.jClassDir);
+	}
 	
 	/**
 	 * After searching for a key in files (which is faster), Refine the search by searching for a regex in the first search's result. 
@@ -95,9 +95,8 @@ public class SearchUtil {
 	 */
 	public ArrayList<SimpleEntry> refineSearch(ArrayList<SimpleEntry> eArray, String regex){
 		ArrayList<SimpleEntry> result = new ArrayList<>();
-		ArrayList<String> regexResult;
+		ArrayList<String> regexResult = new ArrayList<>();
 		for (SimpleEntry e: eArray){
-			
 			regexResult = OtherUtil.getRegexFromString(e.getValue().toString(), regex);
 			if (!regexResult.isEmpty())
 				result.add(e);
@@ -117,9 +116,8 @@ public class SearchUtil {
 		ArrayList<SimpleEntry> result = new ArrayList<>();
 
 		for (SimpleEntry e: eArray){
-			
-		if (OtherUtil.isRegexInString(e.getValue().toString(), regex))
-				result.add(e);
+					if (OtherUtil.isRegexInString(e.getValue().toString(), regex))
+						result.add(e);
 		}
 		
 		return result;

@@ -12,14 +12,17 @@ import base.SearchUtil;
 import cliGui.OutBut;
 import db.DatabaseTester;
 import info.InfoGathering;
+import initialization.TicklerConst;
 import initialization.TicklerVars;
 
 public class Searcher {
 	
 	private SearchUtil searchUtil;
+	private String codeLoc;
 	
 	public Searcher() {
 		this.searchUtil = new SearchUtil();
+		this.codeLoc = TicklerVars.jClassDir;
 	}
 
 	
@@ -30,7 +33,7 @@ public class Searcher {
 	public void sC(String key,boolean all){
 		File stringsXml = new File(TicklerVars.extractedDir+"res/values/strings.xml");
 		ArrayList<SimpleEntry> hits = this.searchInCodeWithOption(key, all);
-		OtherUtil.printSimpleEntryArray(hits, TicklerVars.jClassDir, "[Java_Code_Dir]");
+		OtherUtil.printSimpleEntryArray(hits, this.codeLoc, "[Java_Code_Dir]");
 		
 		OutBut.printH2("Searching for "+key+" in res/strings.xml");
 		ArrayList<String> hits2 = this.searchUtil.findInFile(stringsXml, key);
@@ -39,6 +42,30 @@ public class Searcher {
 			for (String s: hits2)
 				OutBut.printNormal(" "+s+"\n");
 		
+	}
+	
+	/**
+	 * Searches in source code in a custom location.
+	 * @param key
+	 * @param loc
+	 */
+	public void scCustomCodeLoc(String key, String codeRoot){
+		if (codeRoot != null){
+			String codeRootNotHome=codeRoot.replace("~", System.getProperty("user.home"));
+			File cR = new File(codeRootNotHome);
+			if (cR.exists()){
+				this.codeLoc = codeRootNotHome;
+				
+			}
+		
+			else
+			{
+				OutBut.printError("The code location you entered "+codeRoot+" does not exist");
+				OutBut.printStep("Using decompiled Java code from the APK....");
+			}
+		}
+		
+		this.sC(key,false);
 	}
 	
 	/**
@@ -52,11 +79,11 @@ public class Searcher {
 		
 		if (all){
 			OutBut.printH2("Searching for "+key+" in Decompiled Java Code");
-			hits = this.searchUtil.search4KeyInDirFName(TicklerVars.jClassDir, key) ;
+			hits = this.searchUtil.search4KeyInDirFName(this.codeLoc, key) ;
 		}
 		else {
 			OutBut.printH2("Searching for "+key+" in Decompiled Code of the app");
-			hits = this.searchUtil.searchForKeyInJava(key);
+			hits = this.searchUtil.searchForKeyInJava(key, this.codeLoc);
 		}
 		
 		return hits;
@@ -91,7 +118,7 @@ public class Searcher {
 		db.searchForKeyInDb(key);
 
 		//search in external memory
-		this.searchExternalMemory(key);
+		this.searchExternalStorage(key);
 	}
 	
 
@@ -103,7 +130,7 @@ public class Searcher {
 		if (!base64Hits.isEmpty()){
 			OutBut.printH2("The key is base64 encrypted in the following file(s)");
 			for (String s: base64Hits){
-				String filePath = s.replaceAll(TicklerVars.jClassDir, "[Data_Dir]"); 
+				String filePath = s.replaceAll(this.codeLoc, "[Data_Dir]"); 
 				System.out.println("#FileName: "+filePath);
 			}
 			
@@ -111,18 +138,16 @@ public class Searcher {
 		
 	}
 	
-	private void searchExternalMemory(String key) {
+	private void searchExternalStorage(String key) {
 		InfoGathering info = new InfoGathering();
-//		CopyUtil cp = new CopyUtil();
 		FileUtil fU = new FileUtil();
 		String extDir = info.getSdcardDirectory().replaceAll("\\n", "");
-		String destExtDir=TicklerVars.transferDir+"externalMemory";
+		String destExtDir=TicklerVars.transferDir+TicklerConst.COPIED_EXTERNAL_STORAGE_NAME;
 		if (!extDir.isEmpty()){
 			OutBut.printH2("Searching the app's external memory");
-//			if (new File(destExtDir).exists())
-//				fU.deleteFromHost(destExtDir);
 			fU.copyDirToHost(extDir, destExtDir,true);
 			System.out.println("");
+			OutBut.printStep("Copying External Storage Directory: "+extDir+"\n");
 			ArrayList<SimpleEntry> hits = this.searchUtil.search4KeyInDirFName(destExtDir, key);
 			OtherUtil.printSimpleEntryArray(hits, extDir, "[External_Dir]");
 		}

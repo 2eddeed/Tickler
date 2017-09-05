@@ -7,7 +7,6 @@ public class TicklerConst {
 	public static String generalLibName = "libs/";
 	public static String jarsLibName = "jars/";
 	public static String notJarsLibName = "notJars/";
-//	public static String libsDirName = "Tickler_lib";
 	public static String defaultTicklerDirName="Tickler_workspace/";
 	public static String sdCardPathDefault = "/sdcard/Tickler/";
 	public static String MANIFEST_NAME = "AndroidManifest.xml";
@@ -19,12 +18,13 @@ public class TicklerConst {
 	public static String BG_DIR_NAME = "bgSnapshots/";
 	public static String TRANSFER_DIR_NAME = "transfers/";
 	public static String DEX2JAR_OP_DIR_NAME= "JavaCode/";
+	public static String FRIDA_SCRIPTS_DIR_NAME= "fridaScripts/";
 	public static String JAVA_CODE_DIR_NAME = DEX2JAR_OP_DIR_NAME+"Code";
 	public static String newAppTempDir = "newAppTemp/";
+	public static String COPIED_EXTERNAL_STORAGE_NAME="externalStorage/";
 	
 	//Tools names
 	public static String DEX2JAR_EXEC = "/dex2jar-2.1/d2j-dex2jar.sh";
-	public static String FRIDA_SERVER_EXEC="/data/local/tmp/frida-server-10.3.14-android-arm";	
 	public static String KEY_STORE_DIR_NAME = "Keystore/Tickler.keystore";
 	
 	
@@ -33,7 +33,7 @@ public class TicklerConst {
 	public static int SERVICE=2;
 	public static int PROVIDER=3;
 	public static int RECEIVER=4;	
-	public static String version="1.1";
+	public static String version="2";
 	public static final int debuggable=0;
 	public static final int mitm=1;
 	public static String mitmApkName = "mitm.apk";
@@ -62,6 +62,7 @@ public class TicklerConst {
 	 +"	-info				List information about the app	\n"
 	 +"	-squeeze			All strings, log functions, possible credentials in decompiled APK	\n"
 	 +"	-dbg, --debuggable		Create a debuggable version of the app	\n"
+	 +"	-apk <dir> <name>		Compiles a new apk from <dir> directory under the name of <name> \n"
 	 +"	-dataDir [name]			Copies data directory of app to Tickler Directory (DataDir or transfers/name)	\n"
 	 +"	-diff				Copies app's data directory before and after a user's action, then diffs between them\n"
 	 +" 	-diff 	[d| detailed]		like diff, but also shows the changes in case a text file or an unecrypted database is changed\n"
@@ -95,6 +96,23 @@ public class TicklerConst {
 	 + " 	-screen				Captures a screenshot of the device\n"
 	 + " 	-cp2host <source> [destName]	Copies any file/directory to the tickler's app directoy on the host\n"
 	 + " 	-bg,--bgSnapshots		Copies background screenshots that are saved on the device\n\n"
+	 +	"	Frida	\n	"
+	 +	"-----	\n	"
+	 +	"-frida enum 		\n	"
+	 +	"	Enumerates loaded classes	\n	"
+	 +	"-frida vals <ClassName> <MethodName> <NumberOfArgs> [-reuse]	\n	"
+	 +	"	Displays arguments and return value of this method (only primitive datatypes and String)	\n	"
+	 +	"		\n	"
+	 +	"-frida set <ClassName> <MethodName> <NumberOfArgs> <NumberOfArgToModify> <newValue>[-reuse]	\n	"
+	 +	"	Sets the argument number <NumberOfArgToModify> to <newValue> (only primitive datatypes and String)	\n	"
+	 +	"	If <NumberOfArgToModify> > <NumberOfArgs>: sets the return value 	\n	"
+	 +	"	\n	"
+	 +	"-frida unpin <CertificateLocation>	\n	"
+	 +	"	SSL pinning circumvention as in https://codeshare.frida.re/@pcipolloni/universal-android-ssl-pinning-bypass-with-frida/	\n	"
+	 +	"	\n	"
+	 +	"-frida script <scriptPath> <arguments>	\n	"
+	 +	"	Run custom frida python script 	\n\n"
+
 	 +"	Examples:	\n"
 	 +"	---------	\n"
 	 +"	1) List all components of package com.test.package, with detailed information	\n"
