@@ -17,7 +17,6 @@ import manifest.handlers.IntentHandler;
 
 /**
  * This class analyzes the Manifest file and extracts information from it
- * TODO set the launcher in this level or in a higher level (not on the Application class level)
  * @author aabolhadid
  *
  */

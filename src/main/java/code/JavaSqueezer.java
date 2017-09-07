@@ -3,6 +3,7 @@ package code;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.io.File;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
@@ -53,35 +54,30 @@ public class JavaSqueezer {
 		}
 	}
 	public void report(){
+		//Components
 		this.libsAndComponents();
-		this.logInCode();
+		this.libFiles();
+		//Storage
 		this.storage();
 		this.externalStorageInCode();
-		this.sqBackend();
-		this.commentsInCode();
-		this.credentialsInCode();
+		//Communication
+		this.httpUrls();
+		this.pinning();
+		//Crypto
 		this.weakCyphers();
 		this.crypto();
+		//Disclosure
+		this.commentsInCode();
+		this.credentialsInCode();
+		this.logInCode();
 		this.testDisclosure();
 //		this.getStringsInCode();
 		
 		OutBut.printStep("Where [Java_Code_Dir] is "+this.codeRoot);
 	}
 	
-	///////////////////////////// Search in Code ////////////////////////7
-	/**
-	 * Search For all logcat commands In Code
-	 */
-	public void logInCode(){
-		OutBut.printH2("Logging messages in logcat");
-		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("Log",this.codeRoot) ;
-		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, ".*Log\\.\\w\\((\\+?)");
-		eResult.addAll(this.sU.refineSearch(e, ".*getLogger\\(\\)\\.(\\w)"));
-		
-		this.printE(eResult);
-		
-	}
 	
+	//////////////////////////////// Storage //////////////////////////////////
 	/**
 	 * Search for any possible use of external storage
 	 */
@@ -99,6 +95,9 @@ public class JavaSqueezer {
 		ArrayList<SimpleEntry> eArray = this.returnFNameLineGroup(keys, false);
 		this.printE(eArray);
 	}
+	
+	
+	/////////////////////// Components //////////////////////////
 	
 	private void libsAndComponents(){
 		OutBut.printH2("Imports");
@@ -129,6 +128,137 @@ public class JavaSqueezer {
 		}
 		
 	}
+	
+	private void libFiles(){
+		String[] extenstions = {"so"};
+		List<File> soLibs = this.sU.search4FileInDir(TicklerVars.extractedDir, extenstions);
+		if (!soLibs.isEmpty()) {
+			OutBut.printH2("Library files in the app");
+			for (File f:soLibs ){
+				OutBut.printNormal(f.getAbsolutePath().replaceAll(TicklerVars.extractedDir, "[Extracted_Apk]"));
+			}
+			OutBut.printNormal("\nWhere [Extracted_Apk] is "+TicklerVars.extractedDir);
+		}
+	}
+	
+	/////////////////////// Crypto ////////////////////////
+		
+	/**
+	 * Search for weak hashes
+	 */
+	private void weakCyphers() {
+		System.out.println("\n");
+		String[] weakCrypto = {"Rot13", "MD4", "MD5", "RC2", "RC4", "SHA1"};
+		OutBut.printH2("Possible use of weak Ciphers/hashes");
+		
+		ArrayList<SimpleEntry> eA = new ArrayList<>();
+		
+		for (String c : weakCrypto)
+			eA.addAll(this.sU.searchForKeyInJava(c,this.codeRoot));
+		
+		this.printE(eA);
+	}
+	
+	/**
+	 * Use of cryptography 
+	 */
+	private void crypto(){
+		OutBut.printH2("Crypto and hashing keywords");
+		String[] keys = {"aes", "crypt", "cipher", "sha1", "sha2"};
+		ArrayList<SimpleEntry> eA = this.returnFNameLineGroup(keys, false);
+		
+		this.printE(this.removeDuplicatedSimpleEntries(eA));
+	}
+	
+	
+	
+	///////////////////////////// excluded /////////////////////////
+	
+	private void getStringsInCode(){
+		System.out.println("\n");
+		OutBut.printH2("Strings");
+		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("\"",this.codeRoot);
+		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "[^:](\".+\")");
+		
+//		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "(\"\\w{32}\"|\"\\w{40}\"|\"\\w{56}\"|\"\\w{64}\")");
+		this.printE(this.removeDuplicatedSimpleEntries(eResult));
+	}
+	
+	private void getHashes(){
+		System.out.println("\n");
+		OutBut.printH2("Strings");
+		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("\"",this.codeRoot);
+
+		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "(\"\\w{32}\"|\"\\w{40}\"|\"\\w{56}\"|\"\\w{64}\")");
+		this.printE(this.removeDuplicatedSimpleEntries(eResult));
+	}
+	
+	
+	
+	///////////////////////////////// Communication ///////////////////////////////////
+	
+	private void httpUrls(){
+		OutBut.printH2("URLs in code");
+		this.getHttpUris();
+	}
+	
+	public void getHttpUris(){
+		ArrayList<SimpleEntry> hits = this.sU.searchForKeyInJava("http",this.codeRoot); 
+		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(hits, "http(s?)://(.+?)[\"'\\s]");
+
+		this.printE(eResult);
+		
+		OutBut.printH3("HTTP URL summary:");
+		ArrayList<String> uris = new ArrayList<>();
+		for (SimpleEntry e: hits){
+			uris.add(this.correctUrl((String)e.getValue()));
+//			OutBut.printNormal(this.correctUrl((String)e.getValue()));
+		}
+		
+		OtherUtil.printStringArray(OtherUtil.removeDuplicates(uris));
+		
+	}
+	
+	private void pinning(){
+		OutBut.printH2("Pinning");
+		ArrayList<SimpleEntry> hits = this.sU.searchForKeyInJava("certificatePinner",this.codeRoot);
+		this.printE(hits);
+	}
+	
+	
+	private String correctUrl(String line) {
+		String url="";
+		Matcher m = Pattern.compile("http(s?)://(.+?)[\"'\\s]").matcher(line);
+		if (m.find()) {
+			url = line.substring(m.start(0),m.end(0)-1);
+		}
+		return url;
+	}
+	
+	//////////////////////////// Disclosure ////////////////////////////////////
+	
+	
+
+	/**
+	* Search For all logcat commands In Code
+	*/
+	public void logInCode(){
+		OutBut.printH2("Logging messages in logcat");
+		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("Log",this.codeRoot) ;
+		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, ".*Log\\.\\w\\((\\+?)");
+		eResult.addAll(this.sU.refineSearch(e, ".*getLogger\\(\\)\\.(\\w)"));
+		
+		this.printE(eResult);
+	
+	}
+	
+	private void testDisclosure(){
+		OutBut.printH2("Test");
+		ArrayList<SimpleEntry> hits = this.sU.searchForKeyInJava("test",this.codeRoot);
+		hits = this.sU.refineSearch(hits, "(.*(test|TEST).*)");
+		this.printE(hits);
+	}
+	
 	
 	/**
 	 *  stuff like // and maybe what's between /* and *\/ 
@@ -172,97 +302,8 @@ public class JavaSqueezer {
 		
 		this.printE(this.removeDuplicatedSimpleEntries(eA));
 	}
-	
-	/**
-	 * Search for weak hashes
-	 */
-	private void weakCyphers() {
-		System.out.println("\n");
-		String[] weakCrypto = {"Rot13", "MD4", "MD5", "RC2", "RC4", "SHA1"};
-		OutBut.printH2("Possible use of weak Ciphers/hashes");
-		
-		ArrayList<SimpleEntry> eA = new ArrayList<>();
-		
-		for (String c : weakCrypto)
-			eA.addAll(this.sU.searchForKeyInJava(c,this.codeRoot));
-		
-		this.printE(eA);
-	}
-	
-	/**
-	 * Use of cryptography 
-	 */
-	private void crypto(){
-		OutBut.printH2("Crypto");
-		String[] keys = {"aes", "crypt", "cipher"};
-		ArrayList<SimpleEntry> eA = this.returnFNameLineGroup(keys, false);
-		
-		this.printE(this.removeDuplicatedSimpleEntries(eA));
-	}
-	
-	private void getStringsInCode(){
-		System.out.println("\n");
-		OutBut.printH2("Strings");
-		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("\"",this.codeRoot);
-		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "[^:](\".+\")");
-		
-//		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "(\"\\w{32}\"|\"\\w{40}\"|\"\\w{56}\"|\"\\w{64}\")");
-		this.printE(this.removeDuplicatedSimpleEntries(eResult));
-	}
-	
-	private void getHashes(){
-		System.out.println("\n");
-		OutBut.printH2("Strings");
-		ArrayList<SimpleEntry> e = this.sU.searchForKeyInJava("\"",this.codeRoot);
 
-		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(e, "(\"\\w{32}\"|\"\\w{40}\"|\"\\w{56}\"|\"\\w{64}\")");
-		this.printE(this.removeDuplicatedSimpleEntries(eResult));
-	}
-	
-	
-	/**
-	 * Checks in a directory for the keywords of external storage
-	 */
-	
-	public boolean isExternalStorage(){
-		ArrayList<SimpleEntry> eArray = this.sU.searchForKeyInJava("getExternal",this.codeRoot);
-		if (!this.sU.refineSearch(eArray, "(getExternalFilesDir)").isEmpty() || !this.sU.refineSearch(eArray, "getExternalStoragePublicDirectory").isEmpty())
-			return true;
-		
-		return false;
-	}
-	
-	
-	///////////////////////////////// URIs ///////////////////////////////////
-	
-	private void sqBackend(){
-		OutBut.printH2("URLs in code");
-		this.getHttpUris();
-	}
-	
-	public void getHttpUris(){
-		ArrayList<SimpleEntry> hits = this.sU.searchForKeyInJava("http",this.codeRoot); 
-		ArrayList<SimpleEntry> eResult = this.sU.refineSearch(hits, "http(s?)://(.+?)[\"'\\s]");
-
-		this.printE(eResult);
-		
-		OutBut.printH3("HTTP URL summary:");
-		ArrayList<String> uris = new ArrayList<>();
-		for (SimpleEntry e: hits){
-			uris.add(this.correctUrl((String)e.getValue()));
-//			OutBut.printNormal(this.correctUrl((String)e.getValue()));
-		}
-		
-		OtherUtil.printStringArray(OtherUtil.removeDuplicates(uris));
-		
-	}
-	
-	private void testDisclosure(){
-		OutBut.printH2("Test");
-		ArrayList<SimpleEntry> hits = this.sU.searchForKeyInJava("test",this.codeRoot);
-		hits = this.sU.refineSearch(hits, "(.*(test|TEST).*)");
-		this.printE(hits);
-	}
+//////////////////////////////////////Utils /////////////////////////////////	
 	
 	/**
 	 * Print squeeze output to stdout
@@ -325,14 +366,18 @@ public class JavaSqueezer {
 		return eA;
 		
 	}
+
+
+	/**
+	 * Checks in a directory for the keywords of external storage
+	 */
 	
-	private String correctUrl(String line) {
-		String url="";
-		Matcher m = Pattern.compile("http(s?)://(.+?)[\"'\\s]").matcher(line);
-		if (m.find()) {
-			url = line.substring(m.start(0),m.end(0)-1);
-		}
-		return url;
+	public boolean isExternalStorage(){
+		ArrayList<SimpleEntry> eArray = this.sU.searchForKeyInJava("getExternal",this.codeRoot);
+		if (!this.sU.refineSearch(eArray, "(getExternalFilesDir)").isEmpty() || !this.sU.refineSearch(eArray, "getExternalStoragePublicDirectory").isEmpty())
+			return true;
+		
+		return false;
 	}
 	
 	

@@ -127,14 +127,14 @@ public class SearchUtil {
 	/**
 	* Search for extensions in a directory (or list all files in directory)
 	* @param path
-	* @param key filter by extension types
+	* @param extensions filter by extension types
 	* @return
 	*/
-	public List<File> search4FileInDir(String path, String[] key){
+	public List<File> search4FileInDir(String path, String[] extensions){
 		File dir = new File(path);
 		List<File> files;
-		if (key != null){
-			files = (List<File>)FileUtils.listFiles(dir, key, true);
+		if (extensions != null){
+			files = (List<File>)FileUtils.listFiles(dir, extensions, true);
 			
 		}
 		else {

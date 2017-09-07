@@ -1,6 +1,7 @@
 package base;
 
 
+import java.io.File;
 import java.util.ArrayList;
 import actions.Comparer;
 import actions.Searcher;
@@ -69,6 +70,9 @@ public class Tickler {
 			tc.initiaizeTickler(pkgName,true);
 			this.dealer = new ManifestDealer();
 			this.dealer.meetThePackage(pkgName);
+			
+			if (!this.dealer.wasApkExist())
+				this.copyDataDir(null);
 		}
 		catch(TNotFoundEx e)
 		{

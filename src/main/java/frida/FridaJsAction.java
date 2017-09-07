@@ -14,6 +14,14 @@ public class FridaJsAction {
 		
 	}
 	
+	public void executeNoSpawn(String finalCode){
+		this.script.writeCodeInScript(finalCode);
+		this.script.prepareCommandNoSpawning();
+		this.script.run();
+	
+		
+	}
+	
 	protected ArrayList<String> getMethodArguments(int num){
 		ArrayList<String> methodArgs = new ArrayList<>();
 		for (int i=0;i<num;i++){

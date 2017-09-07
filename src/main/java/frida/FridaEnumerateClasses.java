@@ -2,6 +2,7 @@ package frida;
 
 import java.util.ArrayList;
 
+import cliGui.OutBut;
 import initialization.TicklerVars;
 
 public class FridaEnumerateClasses extends FridaJsAction{
@@ -15,19 +16,10 @@ public class FridaEnumerateClasses extends FridaJsAction{
 			this.code = FridaVars.ENUM_CODE;
 	}
 	
-//	public void run(){
-//		this.execute(this.code);
-//	}
-	
-	public void execute(String code){
-		this.script.writeCodeInScript(this.code);
-		this.script.prepareCommandNoSpaining();
-		this.script.run();
+	public void run(){
+		OutBut.printNormal("\nPlease start the app before running this command\n");
+		this.executeNoSpawn(this.code);
 	}
 	
-//
-//	private String prepareCode(ArrayList<String> args){
-//		return this.code;
-//	}
 }
 

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import cliGui.OutBut;
+
 public class FridaCli {
 
 	private FridaBase base;
@@ -32,7 +34,7 @@ public class FridaCli {
 			
 		case "script":
 			this.base.fridaScript(scriptArgs);
-		
+//		
 		
 		case "vals":
 			this.base.fridaGetInputAndOutput(scriptArgs, reuse);
@@ -45,6 +47,10 @@ public class FridaCli {
 		case "unpin":
 			this.base.fridaUnpin(scriptArgs, reuse);
 			break;
+			
+		default:
+				OutBut.printError("Unknown option "+functionName);
+				break;
 		
 		}
 		
