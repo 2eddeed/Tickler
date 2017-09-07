@@ -188,14 +188,16 @@ public class TicklerChecks {
 			System.out.println("Tickler temporary directory on device: "+TicklerConst.sdCardPathDefault);
 		}
 		
-		if (TicklerVars.ticklerDir == null){
+		if (TicklerVars.ticklerDir == null || TicklerVars.ticklerDir.isEmpty()){
 			TicklerVars.ticklerDir = TicklerVars.jarPath+TicklerConst.defaultTicklerDirName;
-			OutBut.printWarning("Configuration File "+TicklerVars.configPath+ " doesn't specify Tickler_local_directory. Workspace is set at "+ TicklerVars.ticklerDir);
+//			OutBut.printWarning("Configuration File "+TicklerVars.configPath+ " doesn't specify Tickler_local_directory. Workspace is set at "+ TicklerVars.ticklerDir);
+			OutBut.printStep("Tickler Workspace directory on host: "+TicklerVars.ticklerDir);
 		}
 		
-		if (TicklerVars.sdCardPath == null) {
+		if (TicklerVars.sdCardPath == null || TicklerVars.sdCardPath.isEmpty()) {
 			TicklerVars.sdCardPath = TicklerConst.sdCardPathDefault;	
-			OutBut.printWarning("Configuration File "+TicklerVars.configPath+ " doesn't specify Tickler's temp directory on the device. It is set to "+ TicklerVars.sdCardPath);
+//			OutBut.printWarning("Configuration File "+TicklerVars.configPath+ " doesn't specify Tickler's temp directory on the device. It is set to "+ TicklerVars.sdCardPath);
+			OutBut.printStep("Tickler temporary directory on device: "+TicklerConst.sdCardPathDefault);
 		}
 			
 	}

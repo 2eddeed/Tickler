@@ -44,7 +44,7 @@ public abstract class TicklerVars {
 		keyStore = libNotJarLib+TicklerConst.KEY_STORE_DIR_NAME;
 		newApkTempDir = appTickDir+TicklerConst.newAppTempDir;
 		
-		fridaScriptsDir = libNotJarLib+TicklerConst.FRIDA_SCRIPTS_DIR_NAME;
+		fridaScriptsDir = appTickDir+TicklerConst.FRIDA_SCRIPTS_DIR_NAME;
 	}
 	
 	public static void setTicklerDir(String dir){

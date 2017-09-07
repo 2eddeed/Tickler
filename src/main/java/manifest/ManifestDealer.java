@@ -27,6 +27,7 @@ public class ManifestDealer {
 	public ManifestAnalyzer manAn;
 	private FileUtil fileT;
 	private ApkToolClass apkTool;
+	private boolean apkExisted = true;
 
 	/////////////////////// Package option /////////////////////////
 	public void meetThePackage(String pkgName){
@@ -77,14 +78,19 @@ public class ManifestDealer {
 	 * If APK does not exist in the package directory on the host, then Ticker fetches the apk
 	 */
 	private void copyApkFromDevice() {
+		if (!this.isApkExist()){
+			OutBut.printStep("Copying APK file from the device");
+			fileT.copyDirToHost(this.getPackageApkPath(), this.appTickDir,true);
+			this.apkExisted = false;
+		}
+
+	}
+	
+	private boolean isApkExist(){
 		String apkPath = this.getPackageApkPath();
 		String apkName = this.getFileNameFromPath(apkPath);
 		File apk = new File(TicklerVars.appTickDir+apkName);
-		if (!apk.exists()){
-			OutBut.printStep("Copying APK file from the device");
-			fileT.copyDirToHost(apkPath, this.appTickDir,true);			
-		}
-
+		return apk.exists();
 	}
 	
 	///////////////////// APK tool Encapsulation ///////////////////////
@@ -181,6 +187,10 @@ public class ManifestDealer {
 
 	public void setManifestPath(String path) {
 		this.manifestPath = path;
+	}
+
+	public boolean wasApkExist() {
+		return apkExisted;
 	}
 
 
