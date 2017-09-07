@@ -5,7 +5,7 @@ import initialization.TicklerVars;
 public abstract class FridaVars {
 
 	//script locations
-	public static String ENUM_LOC = TicklerVars.fridaScriptsDir+"enumerate_classes.py";
+	public static String ENUM_LOC = TicklerVars.fridaScriptsDir+"enumerate_classes.js";
 	public static String GET_VALS_JS = TicklerVars.fridaScriptsDir+"get_attributes_output.js";
 	public static String SET_VALS_JS = TicklerVars.fridaScriptsDir+"set_value_output.js";
 	public static String SSL_CONTEXT_UNPIN_JS = TicklerVars.fridaScriptsDir+"unpin_ssl_context.js";
@@ -13,22 +13,20 @@ public abstract class FridaVars {
 	
 	
 	/// Frida JS Scripts code
-	public static String GET_VALS_CODE= "	        setTimeout(function(){	\n"	 +
-			"	        Java.perform(function () {	\n"	 +
-			"	            var className = Java.use(\"$className\");	\n"	 +
-			"		"	 +
+	public static String GET_VALS_CODE= "setTimeout(function(){	\n"	 +
+			"	Java.perform(function () {	\n"	 +
+			"		var className = Java.use(\"$className\");	\n"	 +
 			"	            className.$method_name.implementation = function ($args) {	\n"	 +
-			"	  var returnValue = this.$method_name($args);	\n"	 +
-
-			"	$console_log_inputs	\n"	 +
-			"	                	"	 +
-			"		if (returnValue != null ) {console.log(\"Output: \"+returnValue.toString());}\n"	 +
-			"			return returnValue;	\n"	 +
-			"		"	 +
+			"					var returnValue = this.$method_name($args);	\n"	 +
+			"					$console_log_inputs	\n"	 +
+//			"	                	"	 +
+			"					if (returnValue != null ) {console.log(\"Output: \"+returnValue.toString()+\"\\n\");}\n"	 +
+			"					return returnValue;	\n"	 +
+//			"		"	 +
 			"	            };	\n"	 +
-			"		"	 +
+//			"		"	 +
 			"	        });	\n"	 +
-			"		"	 +
+//			"		"	 +
 			"	    },0);	\n";
 	
 	
@@ -87,5 +85,17 @@ public abstract class FridaVars {
 			"		   		console.log(\"[+] SSLContext initialized with our custom TrustManager!\");	\n	"	 +
 			"		   	}	\n	"	 +
 			"	    });	\n	"	;
+	
+	public static String ENUM_CODE="Java.perform(\n"
+	+"	function(){\n"
+	+"		Java.enumerateLoadedClasses(\n"
+  	+"		{\n"
+	+"			\"onMatch\": function(className){\n" 
+	+"				console.log(className) \n"
+	+"			},\n"
+	+"			\"onComplete\":function(){}\n"
+  	+"		}\n"
+	+"	)\n"
+	+"})\n";
 
 }

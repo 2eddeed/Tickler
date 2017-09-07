@@ -37,6 +37,10 @@ public class FridaJsScript {
 		this.command = "frida -U -f "+TicklerVars.pkgName+" -l "+this.scriptPath+" --no-pause" ;
 		
 	}
+	
+	public void prepareCommandNoSpaining(){
+		this.command = "frida -U "+TicklerVars.pkgName+" -l "+this.scriptPath+" --no-pause" ;
+	}
 
 
 	

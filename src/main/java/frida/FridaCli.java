@@ -27,7 +27,7 @@ public class FridaCli {
 		
 		switch(functionName){
 		case "enum":
-			this.base.fridaEnumerateClasses();
+			this.base.fridaEnumerateClasses(reuse);
 			break;
 			
 		case "script":

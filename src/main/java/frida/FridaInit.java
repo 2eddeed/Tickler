@@ -1,5 +1,6 @@
 package frida;
 
+import base.FileUtil;
 import cliGui.OutBut;
 import commandExec.Commando;
 import initialization.TicklerVars;
@@ -7,10 +8,12 @@ import initialization.TicklerVars;
 public class FridaInit {
 	
 	private Commando commando;
+	private FileUtil fU;
 	
 	public FridaInit()
 	{
 		this.commando = new Commando();
+		this.fU = new FileUtil();
 	}
 	
 	
@@ -20,7 +23,7 @@ public class FridaInit {
 			System.exit(127);
 		}
 		
-//		this.restartFridaServer();
+		this.fU.createDirOnHost(TicklerVars.fridaScriptsDir);
 		
 	}
 	

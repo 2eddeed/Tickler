@@ -12,10 +12,9 @@ public class FridaBase {
 		
 	}
 	
-	public void fridaEnumerateClasses(){
-		FridaEnumerateClasses enumClasses = new FridaEnumerateClasses();
-		enumClasses.run();
-		ArrayList<String> op = new ArrayList<>();
+	public void fridaEnumerateClasses(boolean reuse){
+		FridaEnumerateClasses enumClasses = new FridaEnumerateClasses(reuse);
+		enumClasses.execute(null);
 	}
 	
 	public void fridaScript(ArrayList<String> args){
