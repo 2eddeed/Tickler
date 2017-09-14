@@ -15,7 +15,7 @@ Tickler requires a linux host (tested on Ubuntu) and a rooted Android device con
 - base.apk: the APK file of the app, installed on the device
 - debuggable.apk: a debuggable version of the app, produced by -dbg
 
-*Tickler\_lib* directory and *Tickler.conf* configuration file exist in the same directory of the jar file. The configuration file sets the location of *TicklerDir* directory on the host and *Tickler* on /sdcard of the android device. If the configuration file does not exist or these 2 directories are not set, then default values will be used (Tickler\_workspace on the current directory and /sdcard/Tickler respectively). *Tickler_lib* directory contains some Java libraries and external tools used by Tickler such as apktool and dex2jar. 
+*libs* directory and *Tickler.conf* configuration file exist in the same directory of the jar file. The configuration file sets the location of *TicklerDir* directory on the host and *Tickler* on /sdcard of the android device. If the configuration file does not exist or these 2 directories are not set, then default values will be used (Tickler\_workspace on the current directory and /sdcard/Tickler respectively). *Tickler_lib* directory contains some Java libraries and external tools used by Tickler such as apktool and dex2jar. 
 
 Tickler highly depends on the following tools, so they should exist on your machine before using Tickler:
 - Java 7 or higher
@@ -30,8 +30,7 @@ How to use it
 =============
 1) Build tool from code
 2) Make sure Tickler.jar is in the same directory as Tickler_lib directory and Tickler.conf file
-3) Move dex2jar-2.1 and Keystore directories to Tickler_lib directory 
-4) Connect your Android device with the application-to-test installed on   
+3) Connect your Android device with the application-to-test installed on   
 
 
 The current version does the following:
@@ -171,9 +170,10 @@ if no value, then the target is all of the above
 
 [-log]: Captures all logcat messages generated during the triggering session. Log file is saved in logs subdirectory.
 
+
 Frida:
-------
-Frida should be installed on your host machine. Also the location of Frida server should be added to *Tickler.conf* file.
+======
+Frida should be installed on your host machine. Also the location of Frida server on the Android device should be added to *Tickler.conf* file.
 
     java -jar Tickler.jar -pkg <package> -frida enum
 Enumerates loaded classes
@@ -189,7 +189,7 @@ If <NumberOfArgToModify> > <NumberOfArgs>: sets the return value
 SSL pinning circumvention as in https://codeshare.frida.re/@pcipolloni/universal-android-ssl-pinning-bypass-with-frida/
 
     java -jar Tickler.jar -pkg <package> -frida script <scriptPath> <arguments>
-Run custom frida python script 
+Run custom frida JS script 
  
 In case of vals and set options, Frida creates/updates a Frida script of that functionality. You can modify the created script as you want, then if you want to run it through tickler, then use *-reuse* option so that it doesn't get overridden.
 

@@ -4,6 +4,7 @@ package frida;
 import java.util.ArrayList;
 
 import base.FileUtil;
+import cliGui.OutBut;
 import commandExec.Commando;
 import initialization.TicklerVars;
 
@@ -21,12 +22,11 @@ public class FridaSetValue {
 	
 	public FridaSetValue(boolean reuseScript) {
 		this.script = new FridaJsScript(FridaVars.SET_VALS_JS);
-		reuseScript = false;
 		
 		if (reuseScript)
 			this.code = this.script.getCodeFromScript();
 		else
-			this.code = FridaVars.SET_VALS_JS;
+			this.code = FridaVars.SET_VALS_CODE;
 	}
 	
 	public void run(ArrayList<String> args){
@@ -41,6 +41,7 @@ public class FridaSetValue {
 	// args would be like: set, ClassName, MethodName, number_of_args, valNum, newValue  
 	// myArgs : pkgName, ClassName, MethodName, methodArgs(arg0,1...etc) 
 	private String prepareCode(ArrayList<String> args){
+		
 		String tempCode = this.code.replaceAll("\\$className", args.get(1)).replaceAll("\\$methodName", args.get(2));
 		int numberOfArgs = new Integer(args.get(3));
 		
@@ -57,17 +58,19 @@ public class FridaSetValue {
 		tempCode = tempCode.replaceAll("\\$args", methodArguments);
 		
 		int numberOfTarget = new Integer(args.get(4));
-		String newValue = args.get(5);
+		String newValue = this.correctStringsInArgs(args.get(5));
 		
-		if (numberOfTarget>numberOfArgs) {
+		if (numberOfTarget>=numberOfArgs) {
 			//Modify return value
 			tempCode = tempCode.replaceAll("\\$returnValue", newValue);
 			tempCode = tempCode.replaceAll("\\$output_line", "console.log(\"Old return value: \"+orig_return.toString()+ \". New return value: \"+"+newValue+");");
 		}
 		else {
 			//Modify an argument
-			tempCode = tempCode.replaceAll("\\$returnValue", "orig_return");
-			tempCode = tempCode.replaceAll("\\$output_line", "console.log(\"Arg number $inputNum: old value: \"+arg$inuputNum+ \". New value: \"+"+newValue+");");
+			String newArgs = this.getNewArgs(numberOfArgs,numberOfTarget,newValue);
+			tempCode = tempCode.replaceAll("\\$returnValue", "this."+args.get(2)+newArgs);
+			String y ="console.log(\"Arg number "+ numberOfTarget+": old value: \"+"+"arg"+numberOfTarget+ "+\". New value: \"+"+newValue+");"; 
+			tempCode = tempCode.replaceAll("\\$output_line", y );
 		}
 		
 		tempCode = tempCode.replaceAll("\\$output_line", consoleLog);
@@ -82,6 +85,33 @@ public class FridaSetValue {
 			methodArgs.add("arg"+i);
 		}
 		return methodArgs;
+	}
+	
+	private String correctStringsInArgs(String arg){
+		
+		if (Integer.getInteger(arg) == null)
+			if (!arg.equals("true") && !arg.equals("false"))
+				return "\\\""+arg+"\\\"";
+		
+		return arg;
+		
+	}
+	
+	private String getNewArgs(int totalNumOfArgs, int argNum, String value){
+		String methodArgs="(";
+		
+		for (int i=0;i<totalNumOfArgs;i++){
+			if (i==argNum)
+				methodArgs+=value+", ";
+			else
+				methodArgs+="arg"+i+", ";
+		}
+		
+		methodArgs = methodArgs.substring(0, methodArgs.length()-2);
+		methodArgs +=");";
+		
+		return methodArgs;
+		
 	}
 	
 }

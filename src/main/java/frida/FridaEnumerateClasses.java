@@ -2,26 +2,24 @@ package frida;
 
 import java.util.ArrayList;
 
+import cliGui.OutBut;
 import initialization.TicklerVars;
 
-public class FridaEnumerateClasses {
+public class FridaEnumerateClasses extends FridaJsAction{
 
-	private FridaPythonScript script;
-	private ArrayList<String> output;
 	
-	public FridaEnumerateClasses(){
-		this.script = new FridaPythonScript();
-		this.output = new ArrayList<>();
-		this.script.setPath(FridaVars.ENUM_LOC);
+	public FridaEnumerateClasses(boolean reuseScript) {
+		this.script = new FridaJsScript(FridaVars.ENUM_LOC);
+		if (reuseScript)
+			this.code = this.script.getCodeFromScript();
+		else
+			this.code = FridaVars.ENUM_CODE;
 	}
 	
 	public void run(){
-		ArrayList<String> input = new ArrayList<>();
-		input.add(TicklerVars.pkgName);
-		this.output = this.script.executeReturnOutput(input);
+		OutBut.printNormal("\nPlease start the app before running this command\n");
+		this.executeNoSpawn(this.code);
 	}
 	
-	public ArrayList<String> getOutput(){
-		return this.output;
-	}
 }
+

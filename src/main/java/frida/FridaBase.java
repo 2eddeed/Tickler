@@ -2,6 +2,7 @@ package frida;
 
 import java.util.ArrayList;
 
+import apk.AppBroker;
 import cliGui.OutBut;
 import commandExec.Commando;
 import initialization.TicklerVars;
@@ -12,15 +13,19 @@ public class FridaBase {
 		
 	}
 	
-	public void fridaEnumerateClasses(){
-		FridaEnumerateClasses enumClasses = new FridaEnumerateClasses();
+	public void fridaEnumerateClasses(boolean reuse){
+		FridaEnumerateClasses enumClasses = new FridaEnumerateClasses(reuse);
 		enumClasses.run();
-		ArrayList<String> op = new ArrayList<>();
 	}
 	
 	public void fridaScript(ArrayList<String> args){
-		FridaPythonScript script = new FridaPythonScript(args);
-		script.execute();
+//		FridaPythonScript script = new FridaPythonScript(args);
+//		script.execute();
+		FridaJsScript script = new FridaJsScript(args.get(1));
+		script.prepareCommandNoSpawning();
+		OutBut.printNormal("\nPlease start the app before running this command\n");
+		
+		script.run();
 	}
 	
 	public void fridaGetInputAndOutput(ArrayList<String> args, boolean reuse){

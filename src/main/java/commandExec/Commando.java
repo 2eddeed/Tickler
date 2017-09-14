@@ -266,7 +266,9 @@ public class Commando {
 	}
 	
 	public String execRoot(String command) {
-		return this.executeCommand("adb shell su -c \'"+command+"\'");
+		return this.executeCommand("adb shell su -c "+command);
+//		ArrayList<String> result = this.executeProcessString("adb shell su -c "+command);
+//		return result.get(0);
 	}
 	
 	/**
@@ -285,7 +287,7 @@ public class Commando {
 	 * @return
 	 */
 	public int execRootPrintOP(String command){
-		String fullCommand = "adb shell su -c \'"+command+"\'";
+		String fullCommand = "adb shell su -c "+command;
 		return this.executeProcessListPrintOP(fullCommand,true);
 	}
 	

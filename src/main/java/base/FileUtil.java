@@ -147,6 +147,18 @@ public class FileUtil {
 	public void copyOnDevice(String src, String dest) {
 		String command = "cp -fr "+src+" "+dest;
 		this.commando.execRoot(command);
+		
+	}
+	
+	public void copyToDevice(String src, String dest) {
+		String fName = this.getFileNameFromPath(src);
+//		this.warnOverrideAndDelete(dest+fName);
+		String sdCardDestPath = TicklerVars.sdCardPath+fName;
+		String command = "adb push "+src+" "+sdCardDestPath;
+		int pullResult=this.commando.executeProcessForAdbPull(command);
+		
+		this.copyOnDevice(sdCardDestPath, dest);
+//		this.deleteDirFromDevice(src);
 	}
 	
 	public void pullFromSDcard(String src, String dest) {
@@ -156,6 +168,8 @@ public class FileUtil {
 		int pullResult=this.commando.executeProcessForAdbPull(command);
 		this.deleteDirFromDevice(src);
 	}
+	
+
 	
 	public String createDirOnDevice(String path) {
 		String command = "mkdir -p "+path;

@@ -29,13 +29,18 @@ public class FridaJsScript {
 	
 	public void run(){
 		
-		commando.executeProcessListPrintOPError(command);	
+//		commando.executeProcessListPrintOPError(command);	
+		commando.executeProcessListPrintOP(command, true);
 		
 	}
 	
 	public void prepareCommand(){
 		this.command = "frida -U -f "+TicklerVars.pkgName+" -l "+this.scriptPath+" --no-pause" ;
 		
+	}
+	
+	public void prepareCommandNoSpawning(){
+		this.command = "frida -U "+TicklerVars.pkgName+" -l "+this.scriptPath+" --no-pause" ;
 	}
 
 

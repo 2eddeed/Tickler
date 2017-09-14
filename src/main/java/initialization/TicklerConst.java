@@ -109,9 +109,9 @@ public class TicklerConst {
 	 +	"	\n	"
 	 +	"-frida unpin <CertificateLocation>	\n	"
 	 +	"	SSL pinning circumvention as in https://codeshare.frida.re/@pcipolloni/universal-android-ssl-pinning-bypass-with-frida/	\n	"
-	 +	"	\n	"
-	 +	"-frida script <scriptPath> <arguments>	\n	"
-	 +	"	Run custom frida python script 	\n\n"
+	 +	"	<CertificateLocation> is the location of your certificate on your host\n\n	"
+	 +	"-frida script <scriptPath>\n	"
+	 +	"	Run custom frida JS script 	\n\n"
 
 	 +"	Examples:	\n"
 	 +"	---------	\n"
