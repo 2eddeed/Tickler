@@ -70,7 +70,6 @@ Returns the following information:
 - If the app is backable
 - If the app is debuggable
 - Data schemes (like iOS IPC)
-- HTTP(s) URIs in the code
 - The permissions it uses
 
 .
@@ -187,9 +186,15 @@ If <NumberOfArgToModify> > <NumberOfArgs>: sets the return value
 
     java -jar Tickler.jar -pkg <package> -frida unpin <CertificateLocation>
 SSL pinning circumvention as in https://codeshare.frida.re/@pcipolloni/universal-android-ssl-pinning-bypass-with-frida/
+<CertificateLocation> is the location of your Certificate on your host
 
+<<<<<<< HEAD
     java -jar Tickler.jar -pkg <package> -frida script <scriptPath> <arguments>
 Run custom frida JS script 
+=======
+    java -jar Tickler.jar -pkg <package> -frida script <scriptPath>
+Runs a frida JS script located at <scriptPath> on your host
+>>>>>>> b6c650e4cb53a65a05a50a95ecd128751aa56f91
  
 In case of vals and set options, Frida creates/updates a Frida script of that functionality. You can modify the created script as you want, then if you want to run it through tickler, then use *-reuse* option so that it doesn't get overridden.
 
